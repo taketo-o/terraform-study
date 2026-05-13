@@ -2,6 +2,8 @@ name: Terraform + SpringBoot CI/CD
 
 on:
   push:
+    branches:
+      - main
     paths:
       - '.github/workflows/terraform-*.yaml'
       - 'TERRAFORM/**.tf'
@@ -15,9 +17,17 @@ on:
       - 'TERRAFORM/tests/**.tftest.hcl'
       - 'TERRAFORM/tests/setup/**.tf'
 
+permissions:
+  contents: read
+  id-token: write 
+
 jobs:
-  terraform:
-    name: Terraform Validation
+
+# =========================
+# CI: Validate + Plan
+# =========================
+  terraform-ci:
+    name: Terraform CI (Validate & Plan)
     runs-on: ubuntu-latest
 
     steps:
@@ -46,65 +56,29 @@ jobs:
       - name: Terraform Test
         run: terraform test
 
-
-  terraform-plan:
-    name: Terraform Plan
-    runs-on: ubuntu-latest
-    needs: terraform
-    if: github.event_name == 'pull_request'
-
-    defaults:
-      run:
-        working-directory: TERRAFORM
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-1
-
-      - name: Terraform Init
-        run: terraform init
-
       - name: Terraform Plan
         run: terraform plan -out=tfplan
-        env:
-          TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
-          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-          TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
-          TF_VAR_key_pair_name: ${{ secrets.KEY_PAIR_NAME }}
 
-      - name: Show Terraform Plan
+      - name: Show Plan (for logs)
         run: terraform show tfplan
 
-      - name: Upload Terraform Plan Artifact
+      - name: Upload Plan Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: terraform-plan
-          path: TERRAFORM/tfplan
+          name: tfplan
+          path: tfplan
 
-
+# =========================
+# CD: Deploy (manual approval)
+# =========================
   deploy:
-    name: Deploy to AWS
+    name: Deploy to AWS (Production)
     runs-on: ubuntu-latest
-    needs: terraform-plan
+    needs: terraform-ci
     if: github.ref == 'refs/heads/main'
 
     environment:
-      name: production
-
-    defaults:
-      run:
-        working-directory: TERRAFORM
-
+      name: production 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -119,17 +93,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-1
 
-      - name: Download Terraform Plan Artifact
+      - name: Download Plan Artifact
         uses: actions/download-artifact@v4
         with:
-          name: terraform-plan
-          path: TERRAFORM
+          name: tfplan
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -input=false
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
-
-      - name: Deploy Spring Boot Artifact
-        run: echo "EC2 deployment step (SSH/S3/CodeDeploy later)"
