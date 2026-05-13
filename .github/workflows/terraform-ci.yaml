@@ -20,7 +20,7 @@ on:
 permissions:
   contents: read
   id-token: write 
-  
+
 jobs:
 
   terraform-ci:
@@ -105,4 +105,4 @@ jobs:
         run: terraform init -input=false
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply tfplan
