@@ -1,3 +1,10 @@
+variables {
+  db_username        = "testuser"
+  db_password        = "TestPass123!"
+  notification_email = "test@example.com"
+  key_pair_name      = "test-key"
+}
+
 run "validate_vpc" {
   command = plan
 
