@@ -80,7 +80,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     environment:
-      name: production
+      name: ci-cd
 
     steps:
       - name: Checkout

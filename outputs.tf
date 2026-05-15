@@ -31,3 +31,8 @@ output "rds_engine" {
 output "waf_scope" {
   value = aws_wafv2_web_acl.main.scope
 }
+
+output "ec2_public_ip" {
+  description = "EC2 Public IP Address"
+  value       = aws_instance.springboot.public_ip
+}
