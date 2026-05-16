@@ -22,3 +22,5 @@
     - name: Show Java version
       debug:
         var: java_version.stderr_lines
+
+        
