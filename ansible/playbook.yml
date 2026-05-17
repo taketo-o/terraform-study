@@ -7,7 +7,6 @@
     - name: Update all packages
       yum:
         name: '*'
-        state: latest
 
     - name: Install Amazon Corretto 17
       yum:
