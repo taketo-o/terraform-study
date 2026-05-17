@@ -6,7 +6,7 @@
   tasks:
     - name: Update all packages
       yum:
-        name: '*'
+        update_cache: yes
 
     - name: Install Amazon Corretto 17
       yum:
