@@ -21,3 +21,7 @@ variable "key_pair_name" {
   description = "EC2 Key Pair Name"
   type        = string
 }
+
+variable "ssh_private_key_path" {
+  type = string
+}
