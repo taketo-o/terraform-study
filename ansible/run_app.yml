@@ -1,0 +1,9 @@
+- name: Run Spring Boot application
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Start Spring Boot (bootRun)
+      shell: ./gradlew bootRun
+      args:
+        chdir: /home/ec2-user/aws-study

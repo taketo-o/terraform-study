@@ -6,16 +6,16 @@ on:
       - main
     paths:
       - '.github/workflows/terraform-*.yaml'
-      - 'TERRAFORM/**.tf'
-      - 'TERRAFORM/tests/**.tftest.hcl'
-      - 'TERRAFORM/tests/setup/**.tf'
+      - 'TERRAFORM-STUDY/**.tf'
+      - 'TERRAFORM-STUDY/tests/**.tftest.hcl'
+      - 'TERRAFORM-STUDY/tests/setup/**.tf'
 
   pull_request:
     paths:
       - '.github/workflows/terraform-*.yaml'
-      - 'TERRAFORM/**.tf'
-      - 'TERRAFORM/tests/**.tftest.hcl'
-      - 'TERRAFORM/tests/setup/**.tf'
+      - 'TERRAFORM-STUDY/**.tf'
+      - 'TERRAFORM-STUDY/tests/**.tftest.hcl'
+      - 'TERRAFORM-STUDY/tests/setup/**.tf'
 
 permissions:
   contents: read

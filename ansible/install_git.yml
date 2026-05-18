@@ -1,0 +1,9 @@
+- name: Install Git
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Install Git
+      dnf:
+        name: git
+        state: present
