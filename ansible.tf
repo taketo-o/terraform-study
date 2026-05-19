@@ -8,7 +8,7 @@ resource "local_file" "ansible_inventory" {
   depends_on = [
     null_resource.create_ansible_dir,
     aws_instance.springboot
-    ]
+  ]
 
   content = <<EOT
 [web]
