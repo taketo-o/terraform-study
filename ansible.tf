@@ -5,7 +5,10 @@ resource "null_resource" "create_ansible_dir" {
 }
 
 resource "local_file" "ansible_inventory" {
-  depends_on = [null_resource.create_ansible_dir]
+  depends_on = [
+    null_resource.create_ansible_dir,
+    aws_instance.springboot
+    ]
 
   content = <<EOT
 [web]
@@ -24,6 +27,6 @@ resource "null_resource" "run_ansible" {
   }
 
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/ansible/inventory.ini ${path.module}/ansible/deploy_app.yml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/ansible/inventory.ini ${path.module}/ansible/import_playbook.yml"
   }
 }

@@ -6,6 +6,6 @@
     - name: Clone repository
       git:
         repo: "{{ repo_url }}"
-        dest: /home/ec2-user/aws-study
-        version: main
+        dest: "{{ app_dir }}"
+        version: "{{ branch }}"
         force: yes 
