@@ -1,7 +1,7 @@
 ---
 - name: Install Java on EC2 (Safe Version)
   hosts: web
-  become: true
+  become: yes
 
   tasks:
     - name: Update yum cache

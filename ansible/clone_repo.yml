@@ -1,6 +1,6 @@
 - name: Clone repository
   hosts: web
-  become_user: ec2-user
+  become: yes
 
   tasks:
     - name: Clone repository
