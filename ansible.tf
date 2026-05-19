@@ -26,4 +26,4 @@ resource "null_resource" "run_ansible" {
   provisioner "local-exec" {
     command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ${path.module}/ansible/inventory.ini ${path.module}/ansible/deploy_app.yml"
   }
-} 
+}
