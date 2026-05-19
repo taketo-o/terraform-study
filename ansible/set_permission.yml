@@ -1,6 +1,6 @@
 - name: Set permission for gradlew
   hosts: web
-  become: yes
+  become_user: ec2-user
 
   tasks:
     - name: Make gradlew executable

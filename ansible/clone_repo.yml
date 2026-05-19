@@ -1,6 +1,6 @@
 - name: Clone repository
   hosts: web
-  become: yes
+  become_user: ec2-user
 
   tasks:
     - name: Clone repository
@@ -8,3 +8,4 @@
         repo: "{{ repo_url }}"
         dest: /home/ec2-user/aws-study
         version: main
+        force: yes
