@@ -6,4 +6,4 @@
     - name: Make gradlew executable
       file:
         path: /home/ec2-user/aws-study/gradlew
-        mode: '0755'
+        mode: '0755' 

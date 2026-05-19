@@ -15,4 +15,4 @@ app_port: 8080
 java_package: "java-21-amazon-corretto-devel"
 
 # Application log file
-app_log: "app.log"
+app_log: "app.log" 

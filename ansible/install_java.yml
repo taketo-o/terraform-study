@@ -11,4 +11,4 @@
     - name: Install Amazon Corretto 21
       yum:
         name: "{{ java_package }}"
-        state: present
+        state: present 
