@@ -5,17 +5,17 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/terraform-*.yml'
-      - 'terraform-study/terraform/**.tf'
-      - 'terraform-study/terraform/tests/**.tftest.hcl'
-      - 'terraform-study/terraform/tests/setup/**.tf'
+      - '.github/workflows/terraform-*.yaml'
+      - 'TERRAFORM/**.tf'
+      - 'TERRAFORM/tests/**.tftest.hcl'
+      - 'TERRAFORM/tests/setup/**.tf'
 
   pull_request:
     paths:
-      - '.github/workflows/terraform-*.yml'
-      - 'terraform-study/terraform/**.tf'
-      - 'terraform-study/terraform/tests/**.tftest.hcl'
-      - 'terraform-study/terraform/tests/setup/**.tf'
+      - '.github/workflows/terraform-*.yaml'
+      - 'TERRAFORM/**.tf'
+      - 'TERRAFORM/tests/**.tftest.hcl'
+      - 'TERRAFORM/tests/setup/**.tf'
 
 permissions:
   contents: read
