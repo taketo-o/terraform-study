@@ -1,0 +1,43 @@
+---
+- name: Deploy Spring Boot Application
+  hosts: web
+  become: yes
+
+  tasks:
+
+    - name: Stop existing Spring Boot service
+      systemd:
+        name: springboot
+        state: stopped
+      ignore_errors: yes
+
+    - name: Build Spring Boot application
+      shell: ./gradlew clean build -x test
+      args:
+        chdir: "{{ app_dir }}"
+
+    - name: Find war file
+      find:
+        paths: "{{ app_dir }}/build/libs"
+        patterns: "*.war"
+      register: jar_file
+
+    - name: Fail if war not found
+      fail:
+        msg: "WAR file was not generated."
+      when: jar_file.files | length == 0
+
+    - name: Copy systemd service file
+      template:
+        src: templates/springboot.service.j2
+        dest: /etc/systemd/system/springboot.service
+
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and restart Spring Boot service
+      systemd:
+        name: springboot
+        enabled: yes
+        state: restarted

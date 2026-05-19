@@ -1,0 +1,16 @@
+- name: Install MySQL Server
+  hosts: web
+  become: yes
+
+  tasks:
+
+    - name: Add MySQL repo
+      ansible.builtin.dnf:
+        name: https://repo.mysql.com/mysql80-community-release-el9.rpm
+        state: present
+        disable_gpg_check: yes
+
+    - name: Install MySQL server
+      ansible.builtin.package:
+        name: mysql-community-server
+        state: present 

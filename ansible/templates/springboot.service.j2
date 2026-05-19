@@ -1,0 +1,20 @@
+[Unit]
+Description=Spring Boot Application
+After=network.target
+
+[Service]
+User=ec2-user
+WorkingDirectory={{ app_dir }}
+
+ExecStart=/usr/bin/java -jar {{ jar_file.files[0].path }}
+
+SuccessExitStatus=143
+
+Restart=always
+RestartSec=5
+
+StandardOutput=append:{{ app_dir }}/{{ app_log }}
+StandardError=append:{{ app_dir }}/{{ app_log }}
+
+[Install]
+WantedBy=multi-user.target

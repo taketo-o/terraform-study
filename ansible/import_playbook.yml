@@ -1,0 +1,6 @@
+- import_playbook: install_java.yml
+- import_playbook: install_mysql.yml
+- import_playbook: install_git.yml
+- import_playbook: clone_repo.yml
+- import_playbook: set_permission.yml 
+- import_playbook: deploy_app.yml

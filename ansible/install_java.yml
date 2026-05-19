@@ -1,0 +1,14 @@
+---
+- name: Install Java on EC2 (Safe Version)
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Update yum cache
+      yum:
+        update_cache: yes
+
+    - name: Install Amazon Corretto 21
+      yum:
+        name: "{{ java_package }}"
+        state: present 

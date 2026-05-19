@@ -1,0 +1,11 @@
+- name: Clone repository
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Clone repository
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_dir }}"
+        version: "{{ branch }}"
+        force: yes 
