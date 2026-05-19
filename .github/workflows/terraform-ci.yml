@@ -6,16 +6,16 @@ on:
       - main
     paths:
       - '.github/workflows/terraform-*.yml'
-      - 'TERRAFORM-STUDY/terraform/**.tf'
-      - 'TERRAFORM-STUDY/terraform/tests/**.tftest.hcl'
-      - 'TERRAFORM-STUDY/terraform/tests/setup/**.tf'
+      - 'terraform-study/terraform/**.tf'
+      - 'terraform-study/terraform/tests/**.tftest.hcl'
+      - 'terraform-study/terraform/tests/setup/**.tf'
 
   pull_request:
     paths:
       - '.github/workflows/terraform-*.yml'
-      - 'TERRAFORM-STUDY/terraform/**.tf'
-      - 'TERRAFORM-STUDY/terraform/tests/**.tftest.hcl'
-      - 'TERRAFORM-STUDY/terraform/tests/setup/**.tf'
+      - 'terraform-study/terraform/**.tf'
+      - 'terraform-study/terraform/tests/**.tftest.hcl'
+      - 'terraform-study/terraform/tests/setup/**.tf'
 
 permissions:
   contents: read
@@ -29,7 +29,7 @@ jobs:
 
     defaults:
      run:
-      working-directory: TERRAFORM-STUDY/terraform
+      working-directory: terraform-study/terraform
 
     env:
       TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
