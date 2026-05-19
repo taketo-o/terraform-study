@@ -17,10 +17,10 @@ run "validate_vpc" {
 run "validate_ec2" {
   command = plan
 
- assert {
-  condition     = output.ec2_instance_type == "t2.small"
-  error_message = "EC2 instance type must be t2.small"
-}
+  assert {
+    condition     = output.ec2_instance_type == "t2.small"
+    error_message = "EC2 instance type must be t2.small"
+  }
 }
 
 run "validate_rds" {
