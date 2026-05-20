@@ -94,4 +94,4 @@ run "validate_springboot_port" {
     condition     = aws_lb_target_group.app.port == 8080
     error_message = "Target group must use port 8080"
   }
-}
+} 
