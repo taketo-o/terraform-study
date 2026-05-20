@@ -3,6 +3,7 @@ variables {
   db_password        = "TestPass123!"
   notification_email = "test@example.com"
   key_pair_name      = "test-key"
+  ssh_private_key_path = "/tmp/dummy.pem"
 }
 
 run "validate_vpc" {
