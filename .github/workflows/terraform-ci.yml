@@ -17,6 +17,8 @@ on:
       - 'tests/**/*.hcl'
       - 'ansible/**'
 
+  workflow_dispatch:    
+
 permissions:
   contents: read
   id-token: write
