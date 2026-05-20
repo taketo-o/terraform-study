@@ -51,8 +51,6 @@ run "validate_waf" {
   }
 }
 
-
-
 run "validate_alb_public" {
   command = plan
 
