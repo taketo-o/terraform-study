@@ -200,3 +200,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
          terraform_version: 1.5.0
+
+      - name: Verify SSH Key
+        run: |
+          ssh-keygen -y -f ~/.ssh/key.pem
