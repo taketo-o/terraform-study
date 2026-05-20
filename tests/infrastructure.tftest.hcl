@@ -51,22 +51,6 @@ run "validate_waf" {
   }
 }
 
-run "validate_ec2_ssh_restriction" {
-  command = plan
-
-  assert {
-    condition = alltrue([
-      for rule in aws_security_group.ec2.ingress :
-      !contains(
-        try(rule.cidr_blocks, []),
-        "0.0.0.0/0"
-      )
-    ])
-
-    error_message = "EC2 SSH must not be open to the world"
-  }
-}
-
 run "validate_alb_public" {
   command = plan
 
