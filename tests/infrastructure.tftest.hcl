@@ -1,8 +1,9 @@
 variables {
-  db_username        = "testuser"
-  db_password        = "TestPass123!"
-  notification_email = "test@example.com"
-  key_pair_name      = "test-key"
+  db_username          = "testuser"
+  db_password          = "TestPass123!"
+  notification_email   = "test@example.com"
+  key_pair_name        = "test-key"
+  ssh_private_key_path = "/tmp/dummy.pem"
 }
 
 run "validate_vpc" {
@@ -17,10 +18,10 @@ run "validate_vpc" {
 run "validate_ec2" {
   command = plan
 
- assert {
-  condition     = output.ec2_instance_type == "t2.small"
-  error_message = "EC2 instance type must be t2.small"
-}
+  assert {
+    condition     = output.ec2_instance_type == "t2.small"
+    error_message = "EC2 instance type must be t2.small"
+  }
 }
 
 run "validate_rds" {
@@ -93,4 +94,4 @@ run "validate_springboot_port" {
     condition     = aws_lb_target_group.app.port == 8080
     error_message = "Target group must use port 8080"
   }
-}
+} 
