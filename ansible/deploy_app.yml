@@ -5,12 +5,6 @@
 
   tasks:
 
-    - name: Stop existing Spring Boot service
-      systemd:
-        name: springboot
-        state: stopped
-      ignore_errors: yes
-
     - name: Build Spring Boot application
       shell: ./gradlew clean build -x test
       args:
