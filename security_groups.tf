@@ -15,52 +15,62 @@ resource "aws_security_group" "alb" {
   # 所属VPC
   vpc_id = aws_vpc.main.id
 
-  # インバウンド通信設定
+  ############################
+  # Inbound Rules (Ingress)
+  ############################
+
+  # HTTP(80)を全世界から許可
   ingress {
 
-    # 開始ポート
+    # ポート範囲開始
     from_port = 80
 
-    # 終了ポート
+    # ポート範囲終了
     to_port = 80
 
     # TCP通信
     protocol = "tcp"
 
-    # 全世界からアクセス許可
-    # HTTP公開用
+    # 0.0.0.0/0 = インターネット全体
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # アウトバウンド通信設定
+  ############################
+  # Outbound Rules (Egress)
+  ############################
+
+  # 全アウトバウンド通信許可
   egress {
 
-    # 全ポート許可
+    # 全ポート
     from_port = 0
     to_port   = 0
 
-    # -1 = 全プロトコル
+    # 全プロトコル許可
     protocol = "-1"
 
-    # 全宛先への通信許可
+    # 全宛先許可
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
 
+############################
+# EC2 Security Group
+############################
+
 # EC2用セキュリティグループ
-# SSH接続とALBからのアプリ通信を許可
+# SSH + ALB経由のアプリ通信を許可
 resource "aws_security_group" "ec2" {
 
-  # セキュリティグループ名
-  name = "ec2-sg"
-
-  # 説明
+  name        = "ec2-sg"
   description = "EC2 Security Group"
+  vpc_id      = aws_vpc.main.id
 
-  # 所属VPC
-  vpc_id = aws_vpc.main.id
+  ############################
+  # SSH Ingress
+  ############################
 
-  # SSH接続許可
+  # SSHアクセス許可（特定IPのみ）
   ingress {
 
     # SSHポート
@@ -70,34 +80,38 @@ resource "aws_security_group" "ec2" {
     # TCP通信
     protocol = "tcp"
 
-    # 特定IPのみSSH許可
-    # /32 = 単一IP指定
+    # 自分のIPのみ許可
+    # chomp(data.http.myip.response_body) で動的取得
     cidr_blocks = ["${chomp(data.http.myip.response_body)}/32"]
   }
 
-  # Spring Bootアプリ用ポート
+  ############################
+  # Application Ingress
+  ############################
+
+  # Spring Bootアプリ(8080)
   # ALBからの通信のみ許可
   ingress {
 
-    # Spring Boot待受ポート
     from_port = 8080
     to_port   = 8080
+    protocol  = "tcp"
 
-    # TCP通信
-    protocol = "tcp"
-
-    # ALBセキュリティグループからの通信のみ許可
+    # ALBセキュリティグループからのみ許可
     security_groups = [aws_security_group.alb.id]
   }
 
-  # EC2から外部への通信許可
+  ############################
+  # Outbound Rules
+  ############################
+
   egress {
 
-    # 全ポート
+    # 全ポート許可
     from_port = 0
     to_port   = 0
 
-    # 全プロトコル
+    # 全プロトコル許可
     protocol = "-1"
 
     # 全宛先許可
@@ -105,45 +119,45 @@ resource "aws_security_group" "ec2" {
   }
 }
 
+############################
+# RDS Security Group
+############################
+
 # RDS用セキュリティグループ
-# EC2からのMySQL接続のみ許可
+# DBへの直接外部アクセスを遮断
 resource "aws_security_group" "rds" {
 
-  # セキュリティグループ名
-  name = "rds-sg"
-
-  # 説明
+  name        = "rds-sg"
   description = "RDS Security Group"
+  vpc_id      = aws_vpc.main.id
 
-  # 所属VPC
-  vpc_id = aws_vpc.main.id
+  ############################
+  # MySQL Ingress
+  ############################
 
-  # MySQL接続許可
+  # MySQL(3306)をEC2からのみ許可
   ingress {
 
-    # MySQLポート
     from_port = 3306
     to_port   = 3306
+    protocol  = "tcp"
 
-    # TCP通信
-    protocol = "tcp"
-
-    # EC2セキュリティグループからのみ接続許可
-    # 外部から直接DB接続できない構成
+    # EC2 SGからのみ許可
+    # インターネットから直接DB接続不可
     security_groups = [aws_security_group.ec2.id]
   }
 
-  # RDSから外部への通信許可
+  ############################
+  # Outbound Rules
+  ############################
+
   egress {
 
-    # 全ポート
+    # 全通信許可
     from_port = 0
     to_port   = 0
+    protocol  = "-1"
 
-    # 全プロトコル
-    protocol = "-1"
-
-    # 全宛先許可
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
