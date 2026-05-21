@@ -166,7 +166,7 @@ run "validate_alb_no_ssh" {
       # SSHポートのみ抽出
       rule if rule.from_port == 22
 
-    # SSHルール数が0であることを確認
+      # SSHルール数が0であることを確認
     ]) == 0
 
     # エラーメッセージ
