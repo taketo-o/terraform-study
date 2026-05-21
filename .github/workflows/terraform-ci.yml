@@ -1,152 +1,262 @@
+# GitHub Actions Workflow名
+# Actionsタブに表示される
 name: Terraform + SpringBoot CI/CD
 
+# Workflow実行条件
 on:
+
+  # mainブランチへpushされた時に実行
   push:
+
+    # 対象ブランチ
     branches:
       - main
+
+    # 指定ファイル変更時のみ実行
     paths:
+
+      # GitHub Actions Workflow変更時
       - '.github/workflows/*.yml'
+
+      # Terraformファイル変更時
       - '**/*.tf'
+
+      # Terraform Testファイル変更時
       - 'tests/**/*.hcl'
+
+      # Ansible変更時
       - 'ansible/**'
 
+  # Pull Request時にも実行
   pull_request:
+
+    # 対象ファイル
     paths:
       - '.github/workflows/*.yml'
       - '**/*.tf'
       - 'tests/**/*.hcl'
       - 'ansible/**'
 
+  # 手動実行(workflow_dispatch)
   workflow_dispatch:
+
+    # 手動実行時の入力値
     inputs:
+
+      # environment入力項目
       environment:
+
+        # 説明
         description: '実行環境を選択してください'
+
+        # 必須入力
         required: true
+
+        # デフォルト値
         default: 'staging'
+
+        # choice形式
         type: choice
+
+        # 選択肢
         options:
           - staging
           - production
 
+# GitHub Actions権限設定
 permissions:
+
+  # Repository読み取り権限
   contents: read
+
+  # OIDC認証用権限
+  # AWS IAM Role Assumeで利用
   id-token: write
 
+# 同時実行制御
 concurrency:
+
+  # 同一グループ名
   group: terraform-deploy
+
+  # 実行中Workflowをキャンセルしない
   cancel-in-progress: false
 
+# Job定義
 jobs:
 
+  #################################################
+  # Terraform CI Job
+  #################################################
+
   terraform-ci:
+
+    # Job名
     name: Terraform CI (Validate & Plan)
+
+    # 実行Runner
     runs-on: ubuntu-latest
 
+    # 環境変数
     env:
+
+      # Terraform変数へGitHub Secretsを渡す
       TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
       TF_VAR_key_pair_name: ${{ secrets.KEY_PAIR_NAME }}
+
+      # Terraform Test用ダミーパス
       TF_VAR_ssh_private_key_path: /tmp/dummy.pem
 
+    # 実行ステップ
     steps:
+
+      # ソースコード取得
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Terraformインストール
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # AWS認証設定
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
+
         with:
+
+          # Assume Role設定
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+
+          # AWSリージョン
           aws-region: ap-northeast-1
 
+      # terraform init
       - name: Terraform Init
         run: terraform init -input=false
 
+      # terraform fmtチェック
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
 
+      # terraform validate
       - name: Terraform Validate
         run: terraform validate
 
+      # terraform test
       - name: Terraform Test
         run: terraform test
 
+      # terraform plan
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
+      # plan結果表示
       - name: Show Plan
         run: terraform show tfplan
 
+  #################################################
+  # Deploy Job
+  #################################################
+
   deploy:
+
+    # Job名
     name: Deploy to AWS
+
+    # 実行Runner
     runs-on: ubuntu-latest
 
+    # terraform-ci成功後のみ実行
     needs: terraform-ci
 
+    # 実行条件
+    # main push または workflow_dispatch時
     if: |
       github.ref == 'refs/heads/main' ||
       github.event_name == 'workflow_dispatch'
 
+    # GitHub Environment
     environment:
       name: ci-cd
 
+    # 環境変数
     env:
+
+      # Terraform変数
       TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
       TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
       TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
       TF_VAR_key_pair_name: ${{ secrets.KEY_PAIR_NAME }}
       TF_VAR_ssh_private_key_path: /tmp/dummy.pem
 
+    # 実行ステップ
     steps:
+
+      # 選択環境表示
       - name: Show Selected Environment
         run: |
           echo "Deploy Environment:"
           echo "${{ github.event.inputs.environment }}"
 
+      # Repository取得
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Terraformインストール
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      # AWS認証
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
+
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-northeast-1
 
+      # terraform init
       - name: Terraform Init
         run: terraform init -input=false
 
+      # 最新状態のplan作成
       # stale tfplan回避
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
+      # terraform apply実行
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
 
-      # EC2 boot待ち
+      # EC2起動待機
       - name: Wait for EC2 Boot
         run: sleep 60
 
+      # SSH秘密鍵作成
       - name: Create SSH Private Key
         run: |
           mkdir -p ~/.ssh
+
+          # GitHub Secretsから秘密鍵作成
           echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > ~/.ssh/key.pem
+
+          # 権限変更
           chmod 600 ~/.ssh/key.pem
 
+      # Terraform OutputからEC2 Public IP取得
       - name: Get EC2 Public IP
         id: tf-output
+
         run: |
           echo "ip=$(terraform output -raw ec2_public_ip)" >> $GITHUB_OUTPUT
 
+      # Public IP表示
       - name: Show EC2 Public IP
         run: |
           echo "${{ steps.tf-output.outputs.ip }}"
 
+      # Ansible Inventory生成
       - name: Create Ansible Inventory
         run: |
           mkdir -p ansible
@@ -156,30 +266,35 @@ jobs:
           ${{ steps.tf-output.outputs.ip }} ansible_user=ec2-user ansible_ssh_private_key_file=/home/runner/.ssh/key.pem
           EOF
 
+      # Inventory確認
       - name: Show Inventory
         run: |
           cat ansible/inventory.ini
 
+      # Ansibleインストール
       - name: Install Ansible
         run: |
           sudo apt update
           sudo apt install -y ansible netcat-openbsd
 
-      # SSH待ち
+      # SSH接続待機
       - name: Wait for SSH
         run: |
           for i in {1..30}; do
+
             echo "Checking SSH..."
 
+            # 22番ポート確認
             nc -zv ${{ steps.tf-output.outputs.ip }} 22 && exit 0
 
             sleep 10
           done
 
+          # 接続失敗時
           echo "SSH connection failed"
           exit 1
 
-      # SSH疎通確認
+      # SSH接続確認
       - name: Test SSH Connection
         run: |
           ssh \
@@ -189,6 +304,7 @@ jobs:
             ec2-user@${{ steps.tf-output.outputs.ip }} \
             "echo SUCCESS"
 
+      # Ansible Playbook実行
       - name: Run Ansible Playbooks
         run: |
           ANSIBLE_HOST_KEY_CHECKING=False \
@@ -196,11 +312,16 @@ jobs:
           -i ansible/inventory.ini \
           ansible/import_playbook.yml
 
+      # Terraform再セットアップ
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-         terraform_version: 1.5.0
 
+        with:
+
+          # Terraformバージョン指定
+          terraform_version: 1.5.0
+
+      # SSH秘密鍵検証
       - name: Verify SSH Key
         run: |
           ssh-keygen -y -f ~/.ssh/key.pem

@@ -1,6 +1,26 @@
+# Ansible Playbookの統合実行ファイル
+# 複数の役割別Playbookを順番に実行する
+
+# Javaインストール処理を実行
+# Spring Boot実行環境の前提
 - import_playbook: install_java.yml
+
+# MySQLインストール処理を実行
+# データベース環境構築
 - import_playbook: install_mysql.yml
+
+# Gitインストール処理を実行
+# ソースコード取得のために必要
 - import_playbook: install_git.yml
+
+# リポジトリクローン処理
+# GitHubからSpring Bootアプリを取得
 - import_playbook: clone_repo.yml
-- import_playbook: set_permission.yml 
+
+# ファイル権限設定処理
+# 実行権限やディレクトリ権限を調整
+- import_playbook: set_permission.yml
+
+# アプリケーションデプロイ処理
+# ビルド・systemd登録・起動まで実行
 - import_playbook: deploy_app.yml
