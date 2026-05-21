@@ -1,9 +1,28 @@
+# Ansible Playbook開始
+# EC2へGitをインストールする処理
+
 - name: Install Git
+
+  # 対象ホストグループ
+  # inventory.ini の [web] に対応
   hosts: web
+
+  # root権限で実行
   become: yes
 
+  # 実行タスク一覧
   tasks:
+
+    # Gitをインストールするタスク
     - name: Install Git
+
+      # dnfパッケージマネージャを使用
+      # Amazon Linux 2023 などで利用される
       dnf:
+
+        # インストール対象パッケージ
         name: git
-        state: present 
+
+        # present = 未インストールならインストール
+        # すでに入っていれば変更なし
+        state: present

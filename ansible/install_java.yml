@@ -1,14 +1,35 @@
----
+# Ansible Playbook開始
+# EC2へJava（Amazon Corretto 21）をインストールする処理
+
 - name: Install Java on EC2 (Safe Version)
+
+  # 対象ホストグループ
+  # inventory.ini の [web] に対応
   hosts: web
+
+  # root権限で実行
   become: yes
 
+  # 実行タスク一覧
   tasks:
+
+    # yumキャッシュを更新
+    # パッケージ情報を最新化する
     - name: Update yum cache
+
+      # yumモジュールを使用
       yum:
         update_cache: yes
 
+    # Java（Amazon Corretto 21）をインストール
     - name: Install Amazon Corretto 21
+
+      # yumでパッケージ管理
       yum:
+
+        # 変数からJavaパッケージ名を取得
+        # variables.yml の java_package を参照
         name: "{{ java_package }}"
-        state: present 
+
+        # インストールされていなければインストール
+        state: present

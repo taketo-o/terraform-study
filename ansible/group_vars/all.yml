@@ -1,18 +1,29 @@
+# YAMLドキュメント開始
 ---
-# Spring Boot application repository
+############################
+# Application Variables
+############################
+
+# Spring BootアプリケーションのGitHubリポジトリURL
+# Ansibleのgitモジュールなどでclone時に使用
 repo_url: "https://github.com/koujienami/aws-study.git"
 
-# Git branch to deploy
+# デプロイ対象ブランチ
+# mainブランチをEC2へデプロイする
 branch: "main"
 
-# Application deployment directory on EC2
+# EC2上のアプリ配置ディレクトリ
+# git clone先やSpring Boot実行場所として利用
 app_dir: /home/ec2-user/aws-study
 
-# Spring Boot execution port
+# Spring Bootアプリケーション待受ポート
+# ALB Target Group側の8080と対応している
 app_port: 8080
 
-# Java package version
+# インストールするJavaパッケージ
+# Amazon Corretto 21(JDK21)
 java_package: "java-21-amazon-corretto-devel"
 
-# Application log file
-app_log: "app.log" 
+# Spring Bootログ出力ファイル名
+# nohup実行時などのログ保存先として利用
+app_log: "app.log"

@@ -1,37 +1,78 @@
----
+# Ansible Playbook開始
+# Spring Bootアプリをビルドし、systemdサービスとして起動するデプロイ処理
+
 - name: Deploy Spring Boot Application
+
+  # 対象ホストグループ
+  # inventory.ini の [web] に対応
   hosts: web
+
+  # sudo権限で実行
   become: yes
 
+  # 実行タスク一覧
   tasks:
 
+    # Spring Bootアプリをビルド
+    # Gradle Wrapperを使用してビルド実行
     - name: Build Spring Boot application
+
+      # シェルコマンド実行
       shell: ./gradlew clean build -x test
+
+      # 実行ディレクトリ指定
+      # リポジトリ直下で実行する必要がある
       args:
         chdir: "{{ app_dir }}"
 
+    # ビルド生成物（warファイル）を検索
     - name: Find war file
+
+      # 指定ディレクトリ内を検索
       find:
         paths: "{{ app_dir }}/build/libs"
         patterns: "*.war"
+
+      # 結果を変数に格納
       register: jar_file
 
+    # WARファイルが存在しない場合は失敗させる
     - name: Fail if war not found
+
+      # 明示的にエラー終了
       fail:
         msg: "WAR file was not generated."
+
+      # 条件付き実行
+      # ファイルが0件なら失敗
       when: jar_file.files | length == 0
 
+    # systemdサービスファイルを配置
     - name: Copy systemd service file
+
+      # Jinja2テンプレートを使用
+      # 変数展開してsystemdファイル生成
       template:
         src: templates/springboot.service.j2
         dest: /etc/systemd/system/springboot.service
 
+    # systemd設定を再読み込み
+    # serviceファイル変更を反映
     - name: Reload systemd daemon
+
       systemd:
         daemon_reload: yes
 
+    # Spring Bootサービスを有効化＆再起動
     - name: Enable and restart Spring Boot service
+
       systemd:
+
+        # サービス名
         name: springboot
+
+        # OS起動時に自動起動
         enabled: yes
+
+        # 即時再起動
         state: restarted

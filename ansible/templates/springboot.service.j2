@@ -1,20 +1,60 @@
+############################
+# systemd Unit File
+############################
+
+# systemdユニット定義開始
 [Unit]
+
+# サービス説明
+# systemctl status 時などに表示される
 Description=Spring Boot Application
+
+# network.target 起動後にこのサービスを起動
+# ネットワーク利用可能になってからSpring Boot起動
 After=network.target
 
+############################
+# Service Settings
+############################
 [Service]
+
+# アプリ実行ユーザー
+# rootではなくec2-userで実行
 User=ec2-user
+
+# 作業ディレクトリ
+# Spring Bootアプリ配置場所
 WorkingDirectory={{ app_dir }}
 
+# Spring Boot起動コマンド
+# jar_file.files[0].path はAnsible変数
+# 検出したjarファイルを実行
 ExecStart=/usr/bin/java -jar {{ jar_file.files[0].path }}
 
+# 正常終了扱いする終了コード
+# 143 = SIGTERM
+# systemctl stop 時などの正常停止対応
 SuccessExitStatus=143
 
+# 異常終了時は自動再起動
 Restart=always
+
+# 再起動までの待機秒数
 RestartSec=5
 
+# 標準出力ログ保存先
+# Spring Bootログをファイルへ追記
 StandardOutput=append:{{ app_dir }}/{{ app_log }}
+
+# 標準エラーログ保存先
+# エラーログも同じファイルへ追記
 StandardError=append:{{ app_dir }}/{{ app_log }}
 
+############################
+# Install Settings
+############################
 [Install]
+
+# multi-user.targetで自動起動
+# EC2起動時に自動でSpring Boot起動
 WantedBy=multi-user.target
